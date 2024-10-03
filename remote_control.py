@@ -70,9 +70,9 @@ class RokuController:
     
     def back(self):
         return self.keypress("Back")
-
-
-roku = RokuController()
+    
+    def info(self):
+        return self.keypress('Info')
 
 
 @app.route("/")

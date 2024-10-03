@@ -48,6 +48,9 @@ document.addEventListener('keydown', function (event) {
             case 'b':
                 sendCommand('back');
                 break;
+            case 'i':
+                sendCommand('info');
+                break;
         }
     }
 });
