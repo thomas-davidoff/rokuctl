@@ -1,5 +1,4 @@
 import socket
-from xml.etree import ElementTree
 
 SSDP_ADDRESS = "239.255.255.250"
 SSDP_PORT = 1900
@@ -22,12 +21,13 @@ def discover_roku_via_ssdp(timeout=5):
     roku_devices = []
     while True:
         try:
-            data, addr = sock.recvfrom(65507)
+            _, addr = sock.recvfrom(65507)
             roku_devices.append(addr[0])
         except socket.timeout:
             break
 
     return roku_devices
+
 
 if __name__ == "__main__":
     devices = discover_roku_via_ssdp()

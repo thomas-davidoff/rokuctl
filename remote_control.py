@@ -1,36 +1,37 @@
 import requests
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 from discover_ssdp import discover_roku_via_ssdp
 
 app = Flask(__name__)
+
+ROKU_IP = ""
 
 
 class RokuController:
 
     roku_port = 8060
 
-    def __init__(self):
+    def __init__(self, manual_ip=None):
+        self.ip = manual_ip or self._discover()
+        self.base_url = f"http://{self.ip}:{self.roku_port}"
+
+    def _base(self):
+        return f"http://{self.ip}:{self.roku_port}"
+
+    def _discover(self):
         discovered_addresses = discover_roku_via_ssdp()
-        if not len(discovered_addresses) == 1:
-            raise Exception('more than 1 roku you rich person.')
-        else:
-            ip = discovered_addresses[0]
-        self.base_url = f"http://{ip}:{self.roku_port}"
+        assert (
+            len(discovered_addresses) == 1
+        ), "Either you've got multiple, or it's undiscoverable"
+        return discovered_addresses[0]
 
     def send_command(self, command):
         url = f"{self.base_url}/{command}"
-        print(url)
         response = requests.post(url)
         return response.status_code
 
     def keypress(self, key):
         return self.send_command(f"keypress/{key}")
-
-    def launch_app(self, app_id):
-        return self.send_command(f"launch/{app_id}")
-
-    def search(self, query):
-        return self.send_command(f"search/browse?keyword={query}")
 
     def play_pause(self):
         return self.keypress("Play")
@@ -67,12 +68,12 @@ class RokuController:
 
     def down(self):
         return self.keypress("Down")
-    
+
     def back(self):
         return self.keypress("Back")
-    
+
     def info(self):
-        return self.keypress('Info')
+        return self.keypress("Info")
 
 
 @app.route("/")
@@ -108,11 +109,15 @@ def send_command():
             roku.home()
         elif command == "play_pause":
             roku.play_pause()
-        elif command == 'back':
+        elif command == "back":
             roku.back()
+        elif command == "info":
+            roku.info()
     return "OK", 200
 
 
-
 if __name__ == "__main__":
-    app.run(host="localhost", port=6969)
+    roku = RokuController(ROKU_IP)
+    app.run(host="localhost", port=6969, debug=True)
+else:
+    pass
