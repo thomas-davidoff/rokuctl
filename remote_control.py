@@ -1,10 +1,11 @@
 import requests
+import argparse
 from flask import Flask, render_template, request
 from discover_ssdp import discover_roku_via_ssdp
 
 app = Flask(__name__)
 
-ROKU_IP = ""
+ROKU_IP = None
 
 
 class RokuController:
@@ -117,7 +118,17 @@ def send_command():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Roku Remote Controller")
+    parser.add_argument(
+        "--ip",
+        type=str,
+        help="IP address of the Roku device (optional, will auto-discover if not provided)",
+    )
+    args = parser.parse_args()
+
+    ROKU_IP = args.ip
     roku = RokuController(ROKU_IP)
+    print(f"Controlling Roku at: {roku.ip}")
     app.run(host="localhost", port=6969, debug=True)
 else:
     pass
